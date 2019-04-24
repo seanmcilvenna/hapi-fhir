@@ -146,28 +146,6 @@ public class PartitionRunnerTest {
 		}
 	}
 
-	@Test
-	public void elevenItemsTwoThreads() throws InterruptedException {
-		Slice<Long> resourceIds = buildSlice(11);
-		myDaoConfig.setExpungeBatchSize(4);
-		myDaoConfig.setExpungeThreadCount(2);
-
-		Consumer<List<Long>> partitionConsumer = buildPartitionConsumer(myLatch);
-		myLatch.setExpectedCount(3);
-		myPartitionRunner.runInPartitionedTransactionThreads(resourceIds, partitionConsumer);
-		List<HookParams> calls = myLatch.awaitExpected();
-		PartitionCall partitionCall1 = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 0);
-		assertThat(partitionCall1.threadName, isOneOf(EXPUNGE_THREADNAME_1, EXPUNGE_THREADNAME_2));
-		assertEquals(4, partitionCall1.size);
-		PartitionCall partitionCall2 = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 1);
-		assertThat(partitionCall2.threadName, isOneOf(EXPUNGE_THREADNAME_1, EXPUNGE_THREADNAME_2));
-		assertEquals(4, partitionCall2.size);
-		assertNotEquals(partitionCall1.threadName, partitionCall2.threadName);
-		PartitionCall partitionCall3 = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 2);
-		assertThat(partitionCall3.threadName, isOneOf(EXPUNGE_THREADNAME_1, EXPUNGE_THREADNAME_2));
-		assertEquals(3, partitionCall3.size);
-	}
-
 	private Consumer<List<Long>> buildPartitionConsumer(PointcutLatch latch) {
 		return list -> latch.call(new PartitionCall(Thread.currentThread().getName(), list.size()));
 	}
