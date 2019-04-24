@@ -6,7 +6,6 @@ import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionConstants;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import com.google.common.collect.Lists;
 import com.icegreen.greenmail.store.FolderException;
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.ServerSetup;
@@ -22,6 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import static ca.uhn.fhir.jpa.subscription.resthook.RestHookTestDstu3Test.logAllInterceptors;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -60,7 +60,14 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 	@Before
 	public void beforeRegisterEmailListener() throws FolderException {
 		ourTestSmtp.purgeEmailFromAllMailboxes();
+
+		ourLog.info("Before re-registering interceptors");
+		logAllInterceptors(myInterceptorRegistry);
+
 		mySubscriptionTestUtil.registerEmailInterceptor();
+
+		ourLog.info("After re-registering interceptors");
+		logAllInterceptors(myInterceptorRegistry);
 
 		mySubscriptionTestUtil.initEmailSender(ourListenerPort);
 

@@ -1,27 +1,30 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.*;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.*;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
-import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseStatus;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.*;
-
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
+import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseStatus;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.Assert.*;
 
 public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourceProviderR4Test {
 
@@ -49,9 +52,9 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 			for (IValidatorModule next : validators) {
 				ourValidatingInterceptor.addValidatorModule(next);
 			}
-			ourRestServer.registerInterceptor(ourValidatingInterceptor);
 		}
-		
+
+		ourRestServer.getInterceptorService().registerInterceptor(ourValidatingInterceptor);
 	}
 
 	

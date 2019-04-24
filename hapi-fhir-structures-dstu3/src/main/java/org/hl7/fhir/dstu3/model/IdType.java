@@ -28,16 +28,20 @@ package org.hl7.fhir.dstu3.model;
   POSSIBILITY OF SUCH DAMAGE.
 
 */
-import static org.apache.commons.lang3.StringUtils.*;
+
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
-import org.apache.commons.lang3.*;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hl7.fhir.instance.model.api.*;
-
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import static org.apache.commons.lang3.StringUtils.*;
 
 /**
  * This class represents the logical identity for a resource, or as much of that
@@ -220,11 +224,11 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
     setValue(theUrl.getValueAsString());
   }
 
-  public void applyTo(IBaseResource theResouce) {
-    if (theResouce == null) {
+  public void applyTo(IBaseResource theResource) {
+    if (theResource == null) {
       throw new NullPointerException("theResource can not be null");
     } else {
-      theResouce.setId(new IdType(getValue()));
+      theResource.setId(new IdType(getValue()));
     }
   }
 

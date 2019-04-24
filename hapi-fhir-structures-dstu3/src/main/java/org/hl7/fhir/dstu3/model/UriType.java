@@ -28,12 +28,11 @@ POSSIBILITY OF SUCH DAMAGE.
 */
 package org.hl7.fhir.dstu3.model;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import org.apache.commons.lang3.StringUtils;
 
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * Primitive type "uri" in FHIR: any valid URI. Sometimes constrained to be only an absolute URI, and sometimes constrained to be a literal reference
@@ -113,7 +112,7 @@ public class UriType extends PrimitiveType<String> {
 
 	@Override
 	protected String parse(String theValue) {
-		return theValue;
+     return theValue;
 	}
 
 	/**

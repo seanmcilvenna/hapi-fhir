@@ -30,7 +30,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -77,6 +76,9 @@ public class DaoRegistry implements ApplicationContextAware {
 		return retVal;
 	}
 
+	/**
+	 * @throws InvalidRequestException If the given resource type is not supported
+	 */
 	public IFhirResourceDao getResourceDao(String theResourceName) {
 		init();
 		IFhirResourceDao retVal = myResourceNameToResourceDao.get(theResourceName);
@@ -99,7 +101,19 @@ public class DaoRegistry implements ApplicationContextAware {
 
 	public <T extends IBaseResource> IFhirResourceDao<T> getResourceDaoIfExists(Class<T> theResourceType) {
 		String resourceName = myContext.getResourceDefinition(theResourceType).getName();
-		return (IFhirResourceDao<T>) getResourceDao(resourceName);
+		try {
+			return (IFhirResourceDao<T>) getResourceDao(resourceName);
+		} catch (InvalidRequestException e) {
+			return null;
+		}
+	}
+
+	public <T extends IBaseResource> IFhirResourceDao<T> getResourceDaoIfExists(String theResourceType) {
+		try {
+			return (IFhirResourceDao<T>) getResourceDao(theResourceType);
+		} catch (InvalidRequestException e) {
+			return null;
+		}
 	}
 
 	private void init() {

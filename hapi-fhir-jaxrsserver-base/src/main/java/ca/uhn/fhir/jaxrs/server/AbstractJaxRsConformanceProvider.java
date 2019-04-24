@@ -20,6 +20,34 @@ package ca.uhn.fhir.jaxrs.server;
  * #L%
  */
 
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest.Builder;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.api.server.IRestfulResponse;
+import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
+import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.ResourceBinding;
+import ca.uhn.fhir.rest.server.RestulfulServerConfiguration;
+import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
+import ca.uhn.fhir.util.ReflectionUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.PostConstruct;
+import javax.ws.rs.GET;
+import javax.ws.rs.OPTIONS;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -27,24 +55,6 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-
-import javax.annotation.PostConstruct;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.slf4j.LoggerFactory;
-
-import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest.Builder;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.api.server.IRestfulResponse;
-import ca.uhn.fhir.rest.server.*;
-import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
-import ca.uhn.fhir.util.ReflectionUtil;
 
 /**
  * This is the conformance provider for the jax rs servers. It requires all providers to be registered during startup because the conformance profile is generated during the postconstruct phase.

@@ -31,15 +31,11 @@ import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -215,24 +211,8 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		responseDetails.setResponseResource(outcome);
 		responseDetails.setResponseCode(operationStatus);
 
-		HttpServletRequest servletRequest = null;
-		HttpServletResponse servletResponse = null;
-		if (theRequest instanceof ServletRequestDetails) {
-			servletRequest = ((ServletRequestDetails) theRequest).getServletRequest();
-			servletResponse = ((ServletRequestDetails) theRequest).getServletResponse();
-		}
-
-		for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
-			IServerInterceptor next = theServer.getInterceptors().get(i);
-			boolean continueProcessing = next.outgoingResponse(theRequest, outcome);
-			if (!continueProcessing) {
-				return null;
-			}
-
-			continueProcessing = next.outgoingResponse(theRequest, responseDetails, servletRequest, servletResponse);
-			if (!continueProcessing) {
-				return null;
-			}
+		if (!BaseResourceReturningMethodBinding.callOutgoingResponseHook(theRequest, responseDetails)) {
+			return null;
 		}
 
 		IRestfulResponse restfulResponse = theRequest.getResponse();

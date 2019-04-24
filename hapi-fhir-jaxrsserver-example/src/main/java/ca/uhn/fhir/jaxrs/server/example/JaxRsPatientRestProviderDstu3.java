@@ -1,29 +1,34 @@
 package ca.uhn.fhir.jaxrs.server.example;
 
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.api.AddProfileTagEnum;
+import ca.uhn.fhir.context.api.BundleInclusionRule;
+import ca.uhn.fhir.jaxrs.server.AbstractJaxRsResourceProvider;
+import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.server.ETagSupportEnum;
+import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
+import ca.uhn.fhir.rest.server.IPagingProvider;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.ejb.Local;
 import javax.ejb.Stateless;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.api.AddProfileTagEnum;
-import ca.uhn.fhir.context.api.BundleInclusionRule;
-import ca.uhn.fhir.jaxrs.server.AbstractJaxRsResourceProvider;
-import ca.uhn.fhir.rest.annotation.*;
-import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.server.*;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A demo JaxRs Patient Rest Provider
@@ -128,7 +133,7 @@ public class JaxRsPatientRestProviderDstu3 extends AbstractJaxRsResourceProvider
 	/** THE DEFAULTS */
 
 	@Override
-	public List<IServerInterceptor> getInterceptors() {
+	public List<IServerInterceptor> getInterceptors_() {
 		return Collections.emptyList();
 	}
 

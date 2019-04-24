@@ -19,15 +19,10 @@ package ca.uhn.fhir.rest.client.impl;
  * limitations under the License.
  * #L%
  */
-import java.lang.reflect.*;
-import java.util.*;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-
-import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.*;
@@ -35,6 +30,15 @@ import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientInappropriateForServerException;
 import ca.uhn.fhir.rest.client.method.BaseMethodBinding;
 import ca.uhn.fhir.util.FhirTerser;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.*;
 
 /**
  * Base class for a REST client factory implementation
@@ -272,10 +276,9 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 	@Override
 	public void validateServerBase(String theServerBase, IHttpClient theHttpClient, IRestfulClient theClient) {
 		GenericClient client = new GenericClient(myContext, theHttpClient, theServerBase, this);
+
+		client.setInterceptorService(theClient.getInterceptorService());
 		client.setEncoding(theClient.getEncoding());
-		for (IClientInterceptor interceptor : theClient.getInterceptors()) {
-			client.registerInterceptor(interceptor);
-		}
 		client.setDontValidateConformance(true);
 
 		IBaseResource conformance;

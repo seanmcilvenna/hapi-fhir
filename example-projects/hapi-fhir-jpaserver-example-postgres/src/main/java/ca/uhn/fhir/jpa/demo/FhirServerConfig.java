@@ -1,13 +1,14 @@
 package ca.uhn.fhir.jpa.demo;
 
-import java.util.Properties;
-
-import javax.persistence.EntityManagerFactory;
-import javax.sql.DataSource;
-
+import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu3;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
+import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu3;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.lang3.time.DateUtils;
-import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,13 +16,9 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu3;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu3;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
-import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
+import javax.persistence.EntityManagerFactory;
+import javax.sql.DataSource;
+import java.util.Properties;
 
 /**
  * This class isn't used by default by the example, but 
@@ -94,8 +91,9 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 
 	/**
 	 * Do some fancy logging to create a nice access log that has details about each incoming request.
+	 * @return
 	 */
-	public IServerInterceptor loggingInterceptor() {
+	public LoggingInterceptor loggingInterceptor() {
 		LoggingInterceptor retVal = new LoggingInterceptor();
 		retVal.setLoggerName("fhirtest.access");
 		retVal.setMessageFormat(

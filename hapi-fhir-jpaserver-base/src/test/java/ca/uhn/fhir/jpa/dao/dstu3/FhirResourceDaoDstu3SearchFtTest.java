@@ -1,25 +1,26 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
-import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.*;
-
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl.Suggestion;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
+import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
 
 public class FhirResourceDaoDstu3SearchFtTest extends BaseJpaDstu3Test {
 	
@@ -264,7 +265,7 @@ public class FhirResourceDaoDstu3SearchFtTest extends BaseJpaDstu3Test {
 		 */
 
 		patient = new Patient();
-		patient.setId(pId1);
+		patient.setId(pId1.getValue());
 		patient.getText().setDivAsString("<div>DIVBBB</div>");
 		patient.addName().addGiven("NAMEBBB");
 		myPatientDao.update(patient, mockSrd());

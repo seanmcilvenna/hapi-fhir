@@ -23,8 +23,8 @@ import org.hl7.fhir.dstu3.model.Bundle.BundleLinkComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.dstu3.model.DiagnosticReport.DiagnosticReportStatus;
-import org.hl7.fhir.dstu3.model.ElementDefinition.ElementDefinitionBindingComponent;
 import org.hl7.fhir.dstu3.model.Enumeration;
+import org.hl7.fhir.dstu3.model.ElementDefinition.ElementDefinitionBindingComponent;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Enumerations.DocumentReferenceStatus;
 import org.hl7.fhir.dstu3.model.HumanName.NameUse;
@@ -49,12 +49,11 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.*;
 import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.Matchers.*;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.text.StringContainsInOrder.stringContainsInOrder;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 public class XmlParserDstu3Test {
@@ -67,6 +66,16 @@ public class XmlParserDstu3Test {
 			ourCtx = FhirContext.forDstu3();
 		}
 		ourCtx.setNarrativeGenerator(null);
+	}
+
+	@Test
+	public void testEncodeInvalidMetaTime() {
+
+		Patient p = new Patient();
+		p.getMeta().getLastUpdatedElement().setValueAsString("2019-01-01");
+		String output = ourCtx.newXmlParser().encodeResourceToString(p);
+		assertThat(output, containsString("lastUpdated value=\"2019-01-01\""));
+
 	}
 
 	@Test

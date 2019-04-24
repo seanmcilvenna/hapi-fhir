@@ -22,6 +22,8 @@ package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
@@ -36,10 +38,8 @@ import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.server.BundleProviders;
-import ca.uhn.fhir.rest.server.IDynamicSearchResourceProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.*;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.ReflectionUtil;
 import org.apache.commons.io.IOUtils;
@@ -247,10 +247,15 @@ public abstract class BaseMethodBinding<T> {
 		// Handle server action interceptors
 		RestOperationTypeEnum operationType = getRestOperationType(theRequest);
 		if (operationType != null) {
-			for (IServerInterceptor next : theServer.getInterceptors()) {
-				ActionRequestDetails details = new ActionRequestDetails(theRequest);
-				populateActionRequestDetailsForInterceptor(theRequest, details, theMethodParams);
-				next.incomingRequestPreHandled(operationType, details);
+			ActionRequestDetails details = new ActionRequestDetails(theRequest);
+			populateActionRequestDetailsForInterceptor(theRequest, details, theMethodParams);
+			HookParams preHandledParams = new HookParams();
+			preHandledParams.add(RestOperationTypeEnum.class, operationType);
+			preHandledParams.add(ActionRequestDetails.class, details);
+			if (theRequest.getInterceptorBroadcaster() != null) {
+				theRequest
+					.getInterceptorBroadcaster()
+					.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, preHandledParams);
 			}
 		}
 

@@ -1,33 +1,5 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
-
-import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.hamcrest.Matchers;
-import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.*;
-import org.mockito.Mockito;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -43,6 +15,30 @@ import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.IValidationContext;
 import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.hamcrest.Matchers;
+import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.junit.*;
+import org.mockito.Mockito;
+
+import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
+
+import static org.mockito.Mockito.mock;
 
 public class ResponseValidatingInterceptorDstu3Test {
 	public static IBaseResource myReturnResource;
@@ -58,9 +54,7 @@ public class ResponseValidatingInterceptorDstu3Test {
 	@Before
 	public void before() {
 		myReturnResource = null;
-		while (ourServlet.getInterceptors().size() > 0) {
-			ourServlet.unregisterInterceptor(ourServlet.getInterceptors().get(0));
-		}
+		ourServlet.getInterceptorService().unregisterAllInterceptors();
 
 		myInterceptor = new ResponseValidatingInterceptor();
 		// myInterceptor.setFailOnSeverity(ResultSeverityEnum.ERROR);

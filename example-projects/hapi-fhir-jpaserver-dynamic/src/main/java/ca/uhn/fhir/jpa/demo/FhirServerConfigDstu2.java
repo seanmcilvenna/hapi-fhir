@@ -1,8 +1,10 @@
 package ca.uhn.fhir.jpa.demo;
 
-import javax.persistence.EntityManagerFactory;
-import javax.sql.DataSource;
-
+import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu2;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu2;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -14,10 +16,8 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu2;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu2;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import javax.persistence.EntityManagerFactory;
+import javax.sql.DataSource;
 
 
 /**
@@ -82,8 +82,9 @@ public class FhirServerConfigDstu2 extends BaseJavaConfigDstu2 {
 
 	/**
 	 * Do some fancy logging to create a nice access log that has details about each incoming request.
+	 * @return
 	 */
-	public IServerInterceptor loggingInterceptor() {
+	public LoggingInterceptor loggingInterceptor() {
 		return FhirServerConfigCommon.loggingInterceptor();
 	}
 

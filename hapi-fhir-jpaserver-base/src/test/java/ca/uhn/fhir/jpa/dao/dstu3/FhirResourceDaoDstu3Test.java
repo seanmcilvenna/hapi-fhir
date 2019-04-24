@@ -1,6 +1,9 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import ca.uhn.fhir.jpa.dao.*;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
@@ -10,11 +13,12 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.SortOrderEnum;
+import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.*;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
@@ -35,7 +39,6 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.*;
-import org.mockito.ArgumentCaptor;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -43,11 +46,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
 
 @SuppressWarnings({"unchecked", "deprecation"})
 public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
@@ -673,58 +673,6 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		p.setId("Patient/ABC");
 		String id = myPatientDao.create(p, mySrd).getId().getIdPart();
 		assertNotEquals("ABC", id);
-	}
-
-	@Test
-	public void testCreateWithIfNoneExistBasic() {
-		String methodName = "testCreateWithIfNoneExistBasic";
-		MethodOutcome results;
-
-		Patient p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IIdType id = myPatientDao.create(p, mySrd).getId();
-		ourLog.info("Created patient, got it: {}", id);
-
-		// Verify interceptor
-		ArgumentCaptor<ActionRequestDetails> detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
-		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.CREATE), detailsCapt.capture());
-		ActionRequestDetails details = detailsCapt.getValue();
-		assertNull(details.getId());
-		assertEquals("Patient", details.getResourceType());
-		assertEquals(Patient.class, details.getResource().getClass());
-
-		reset(myInterceptor);
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().setFamily("Hello");
-		results = myPatientDao.create(p, "Patient?identifier=urn%3Asystem%7C" + methodName, mySrd);
-		assertEquals(id.getIdPart(), results.getId().getIdPart());
-		assertFalse(results.getCreated().booleanValue());
-
-		verifyNoMoreInteractions(myInterceptor);
-
-		// Now create a second one
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().setFamily("Hello");
-		results = myPatientDao.create(p, mySrd);
-		assertNotEquals(id.getIdPart(), results.getId().getIdPart());
-		assertTrue(results.getCreated().booleanValue());
-
-		// Now try to create one with the original match URL and it should fail
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().setFamily("Hello");
-		try {
-			myPatientDao.create(p, "Patient?identifier=urn%3Asystem%7C" + methodName, mySrd);
-			fail();
-		} catch (PreconditionFailedException e) {
-			assertThat(e.getMessage(), containsString("Failed to CREATE"));
-		}
-
 	}
 
 	@Test
@@ -2278,43 +2226,6 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 	}
 
-	@Test
-	public void testRead() {
-		Observation o1 = new Observation();
-		o1.getCode().addCoding().setSystem("foo").setCode("testRead");
-		IIdType id1 = myObservationDao.create(o1, mySrd).getId();
-
-		/*
-		 * READ
-		 */
-
-		reset(myInterceptor);
-		Observation obs = myObservationDao.read(id1.toUnqualifiedVersionless(), mySrd);
-		assertEquals(o1.getCode().getCoding().get(0).getCode(), obs.getCode().getCoding().get(0).getCode());
-
-		// Verify interceptor
-		ArgumentCaptor<ActionRequestDetails> detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
-		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.READ), detailsCapt.capture());
-		ActionRequestDetails details = detailsCapt.getValue();
-		assertEquals(id1.toUnqualifiedVersionless().getValue(), details.getId().toUnqualifiedVersionless().getValue());
-		assertEquals("Observation", details.getResourceType());
-
-		/*
-		 * VREAD
-		 */
-		assertTrue(id1.hasVersionIdPart()); // just to make sure..
-		reset(myInterceptor);
-		obs = myObservationDao.read(id1, mySrd);
-		assertEquals(o1.getCode().getCoding().get(0).getCode(), obs.getCode().getCoding().get(0).getCode());
-
-		// Verify interceptor
-		detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
-		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.VREAD), detailsCapt.capture());
-		details = detailsCapt.getValue();
-		assertEquals(id1.toUnqualified().getValue(), details.getId().toUnqualified().getValue());
-		assertEquals("Observation", details.getResourceType());
-
-	}
 
 	@Test
 	public void testReadForcedIdVersionHistory() {

@@ -1,6 +1,27 @@
 package ca.uhn.fhir.jaxrs.server;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.api.AddProfileTagEnum;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsExceptionInterceptor;
+import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsResponseException;
+import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest;
+import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest.Builder;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.server.*;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import org.apache.commons.lang3.StringUtils;
+
+import javax.ws.rs.core.*;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
 /*
  * #%L
  * HAPI FHIR JAX-RS Server
@@ -10,9 +31,9 @@ import java.io.IOException;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,22 +41,6 @@ import java.io.IOException;
  * limitations under the License.
  * #L%
  */
-import java.util.*;
-import java.util.Map.Entry;
-
-import javax.ws.rs.core.*;
-
-import org.apache.commons.lang3.StringUtils;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.api.AddProfileTagEnum;
-import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsExceptionInterceptor;
-import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsResponseException;
-import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest;
-import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest.Builder;
-import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.server.*;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 /**
  * This is the abstract superclass for all jaxrs providers. It contains some defaults implementing
@@ -72,6 +77,11 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 	 */
 	protected AbstractJaxRsProvider(final FhirContext ctx) {
 		CTX = ctx;
+	}
+
+	@Override
+	public IInterceptorService getInterceptorService() {
+		return null;
 	}
 
 	/**
@@ -145,10 +155,10 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 	 * Default: an empty list of interceptors (Interceptors are not yet supported
 	 * in the JAX-RS server). Please get in touch if you'd like to help!
 	 * 
-	 * @see ca.uhn.fhir.rest.server.IRestfulServer#getInterceptors()
+	 * @see ca.uhn.fhir.rest.server.IRestfulServerDefaults#getInterceptors_()
 	 */
 	@Override
-	public List<IServerInterceptor> getInterceptors() {
+	public List<IServerInterceptor> getInterceptors_() {
 		return Collections.emptyList();
 	}
 
